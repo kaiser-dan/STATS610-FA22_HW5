@@ -6,7 +6,9 @@ llr = function(x, y, z, omega) {
 compute_f_hat = function(z, x, y, omega) {
   Wz = make_weight_matrix(z, x, omega)
   X = make_predictor_matrix(x)
-  f_hat = c(1, z) %*% solve(t(X) %*% Wz %*% X) %*% t(X) %*% Wz %*% y
+  Wz_X <- apply(X, 2, function(X,w) {w*X}, w=Wz)
+  #Wz_y <- apply(y, 2, function(y,w) {w*y}, w=Wz)
+  f_hat = c(1, z) %*% solve(t(X) %*% Wz_X) %*% t(X) %*% Wz * y
   return(f_hat)
 }
 
@@ -14,7 +16,7 @@ make_weight_matrix = function(z,x,omega) {
   x.shifted <- (1/omega)*abs(x-z)
   x.shifted.sub_unit_norm <- x.shifted < 1
   W.diag <- x.shifted.sub_unit_norm * (1-x.shifted^3)^3
-  W <- diag(W.diag)
+  W <- W.diag
   return(W)
 }
 
